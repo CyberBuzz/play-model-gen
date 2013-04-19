@@ -16,10 +16,10 @@
       <name>The Seasar Foundation Maven2 Repository</name>
       <url>http://maven.seasar.org/maven2</url>
     </repository>
+    <!-- advanced-s2jdbc-gen Maven Repository -->
     <repository>
-      <id>stormcat</id>
-      <name>Stormcat Repository</name>
-      <url>http://maven.stormcat.me/repository/</url>
+        <id>advanced-s2jdbc-gen</id>
+        <url>https://raw.github.com/CyberBuzz/advanced-s2jdbc-gen/mvn-repo/</url>
     </repository>
   </repositories>
 
@@ -65,8 +65,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>me.stormcat.maven.plugin</groupId>
-      <artifactId>advanced-s2jdbc-gen-lib</artifactId>
+      <groupId>advanced-s2jdbc-gen</groupId>
+      <artifactId>advanced-s2jdbc-gen</artifactId>
       <version>0.1.2</version>
     </dependency>
     <dependency>
