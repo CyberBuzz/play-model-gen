@@ -14,23 +14,26 @@ import ${packageAbstract}.${meta.abstractEntityName};
 @Table(name = "${meta.table.name}")
 public class ${meta.entityName} extends ${meta.abstractEntityName} {
 
+    // serialVesrionUID
+    private static final long serialVersionUID = 1L;
+
     /**
      * 指定したIDに一致し、論理削除されていないレコードを返します。
      * @param id ID
      * @return 結果
      */
-    public static ${meta.entityName} findAliveById(long id) {
-        java.util.List<${meta.entityName}> result = find("id = ? AND del = 0", id).fetch();
-        return result.isEmpty() ? null : result.get(0);
-    }
-    
+//    public static ${meta.entityName} findAliveById(long id) {
+//        java.util.List<${meta.entityName}> result = find("id = ? AND del = 0", id).fetch();
+//        return result.isEmpty() ? null : result.get(0);
+//    }
+
     /**
      * 論理削除されていないレコードを全件取得します。
      * @return 結果
      */
-    public static java.util.List<${meta.entityName}> findAliveAll() {
-        return find("del = 0").fetch();
-    }
+//    public static java.util.List<${meta.entityName}> findAliveAll() {
+//        return find("del = 0").fetch();
+//    }
 
     // @OneToMany area
 }

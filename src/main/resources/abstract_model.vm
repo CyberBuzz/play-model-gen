@@ -3,9 +3,9 @@ package ${packageAbstract};
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import jp.co.cyberbuzz.play.db.Model;
+import play.db.ebean.Model;
 
-import ${packageConcrete}.*;
+//import ${packageConcrete}.*;
 
 /**
  *
@@ -14,6 +14,9 @@ import ${packageConcrete}.*;
  */
 @MappedSuperclass
 public abstract class ${meta.abstractEntityName} extends Model {
+
+    // serialVesrionUID
+    private static final long serialVersionUID = 1L;
 #foreach(${column} in ${meta.table.columnList})
 
     ${column.columnAnnotation}
