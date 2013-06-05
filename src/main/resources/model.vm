@@ -1,9 +1,15 @@
-package ${packageConcrete};
+package ${packageConcrete}.${meta.dbTypePackage};
 
+import java.util.Date;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import ${packageAbstract}.${meta.abstractEntityName};
+
+import constant.Flg;
+import play.db.ebean.Model;
+import jp.co.cyberbuzz.play.PlayDateTime;
 
 /**
  *
@@ -12,28 +18,53 @@ import ${packageAbstract}.${meta.abstractEntityName};
  */
 @Entity
 @Table(name = "${meta.table.name}")
-public class ${meta.entityName} extends ${meta.abstractEntityName} {
+public class ${meta.dbType}${meta.entityName} extends ${meta.abstractEntityName} {
 
     // serialVesrionUID
     private static final long serialVersionUID = 1L;
+
+    // ModelFinder
+    public static Model.Finder<Long, ${meta.entityName}> find = new Model.Finder<Long, ${meta.entityName}>(Long.class, ${meta.entityName}.class);
 
     /**
      * 指定したIDに一致し、論理削除されていないレコードを返します。
      * @param id ID
      * @return 結果
      */
-//    public static ${meta.entityName} findAliveById(long id) {
-//        java.util.List<${meta.entityName}> result = find("id = ? AND del = 0", id).fetch();
-//        return result.isEmpty() ? null : result.get(0);
-//    }
+    public static ${meta.entityName} findAliveById(long id) {
+    	${meta.entityName} result = find.where()
+    	                  .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
+        return entity == null ? new ${meta.entityName}(): result;
+    }
 
     /**
      * 論理削除されていないレコードを全件取得します。
      * @return 結果
      */
-//    public static java.util.List<${meta.entityName}> findAliveAll() {
-//        return find("del = 0").fetch();
-//    }
+    public static java.util.List<${meta.entityName}> findAliveAll() {
+        return find.where()
+                   .eq("deleteFlg", Flg.OFF.getValue()).findList();
+    }
+
+    /**
+     * 登録処理
+     */
+    public static void save() {
+        Date now = PlayDateTime.now().toDate();
+        this.createDate = now;
+        this.updateDate = now;
+        super.save();
+    }
+
+    /**
+     * 登録処理
+     */
+    public static void update(Object obj) {
+        Date now = PlayDateTime.now().toDate();
+        this.updateDate = now;
+        super.update(obj);
+    }
+
 
     // @OneToMany area
 }

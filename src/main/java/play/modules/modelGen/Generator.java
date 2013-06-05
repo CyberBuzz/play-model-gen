@@ -19,7 +19,6 @@ import java.util.Set;
 
 import me.stormcat.maven.plugin.s2jdbcgen.DelFlag;
 import me.stormcat.maven.plugin.s2jdbcgen.GenerateCodeExecutor;
-import me.stormcat.maven.plugin.s2jdbcgen.ModelMeta;
 import me.stormcat.maven.plugin.s2jdbcgen.factory.ColumnListBuilder;
 import me.stormcat.maven.plugin.s2jdbcgen.meta.CodeDef;
 import me.stormcat.maven.plugin.s2jdbcgen.meta.CodeValue;
@@ -32,6 +31,7 @@ import me.stormcat.maven.plugin.s2jdbcgen.util.FileUtil;
 import me.stormcat.maven.plugin.s2jdbcgen.util.StringUtil;
 import net.arnx.jsonic.JSON;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -46,11 +46,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 
 /**
- * 
+ *
  * only mysql
- * 
+ *
  * @author konuma_akio
- * 
+ *
  */
 public class Generator {
 
@@ -73,7 +73,7 @@ public class Generator {
     private final String vmAbstract;
 
     private final String vmConcrete;
-    
+
     private final String enumDirPath;
 
     private DelFlag delFlag;
@@ -118,7 +118,7 @@ public class Generator {
             logger.info(String.format("delFlag#delValue=%s", delFlag.isDelValue()));
         }
         logger.info("-------------------------");
-        
+
         File enumDir = new File(enumDirPath);
         Map<String, CodeValue[]> enumMap = new LinkedHashMap<String, CodeValue[]>();
         if (enumDir.exists()) {
@@ -137,7 +137,7 @@ public class Generator {
         } else {
             logger.info("Enum json directory not found.");
         }
-        
+
         logger.info(String.format("%s", schema));
         Map<String, ModelMeta> metaMap = new LinkedHashMap<String, ModelMeta>();
         try {
@@ -171,7 +171,7 @@ public class Generator {
                             referencedTable));
                     column.setReferencedModel(metaMap.get(referencedTable.trim()));
                 }
-                
+
                 // 再代入なのであまりよい実装ではないが妥協 yamada
                 CodeValue[] codeValues = enumMap.get(enumKey);
                 if (codeValues != null && codeValues.length > 0) {
@@ -189,30 +189,73 @@ public class Generator {
         FileUtil.mkdirsIfNotExists(pathConcrete);
 
         List<ModelMeta> modelMetaItems = new ArrayList<ModelMeta>();
-
         for (Entry<String, ModelMeta> model : metaMap.entrySet()) {
             ModelMeta modelMeta = model.getValue();
-
-            String abstractEntityFilePath = String
-                    .format("%s/%s.java", pathAbstract, modelMeta.getAbstractEntityName());
-            String entityFilePath = String.format("%s/%s.java", pathConcrete, modelMeta.getEntityName());
-
-            File abstractEntityFile = new File(abstractEntityFilePath);
-            File entityFile = new File(entityFilePath);
-
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("meta", modelMeta);
-            params.put("delFlag", delFlag);
-            params.put("packageAbstract", packageAbstract);
-            params.put("packageConcrete", packageConcrete);
-
             logger.info(String.format("generate *%s", modelMeta.getTable().getName()));
-            writeContentsToFile(abstractEntityFile, this.vmAbstract, params, true);
-            writeContentsToFile(entityFile, this.vmConcrete, params, false);
-
+            this.generateAbsractEntity(modelMeta, delFlag, pathAbstract);
+            this.generateEntity(modelMeta, delFlag, pathConcrete);
             modelMetaItems.add(modelMeta);
         }
+    }
 
+    /**
+     * Entityクラス生成処理
+     * @param modelMeta ModelMeta
+     * @param delFlag DelFlag
+     * @param pathConcrete
+     */
+    private void generateEntity(ModelMeta modelMeta, DelFlag delFlag, String pathConcrete) {
+        String[] dbTypes = new String[]{"Master", "Slave"};
+        for(String dbType : dbTypes) {
+        	String entityName = String.format("%s%s",
+        			org.apache.commons.lang.StringUtils.capitalize(dbType), modelMeta.getEntityName());
+        	String path = String.format("%s/%s", pathConcrete, org.apache.commons.lang.StringUtils.lowerCase(dbType));
+            String entityFilePath = String.format("%s/%s.java", path, entityName);
+            File entityFile = new File(entityFilePath);
+            Map<String, Object> params = this.createParams(dbType, modelMeta, delFlag);
+            writeContentsToFile(entityFile, this.vmConcrete, params, false);
+        }
+        modelMeta.setDbType(StringUtils.EMPTY);
+    }
+
+    /**
+     *
+     * @param modelMeta
+     * @param delFlag
+     * @param pathAbstract
+     */
+    private void generateAbsractEntity(ModelMeta modelMeta, DelFlag delFlag, String pathAbstract) {
+        String filePath = String.format("%s/%s.java", pathAbstract, modelMeta.getAbstractEntityName());
+        File abstractEntityFile = new File(filePath);
+        Map<String, Object> params = this.createParams(modelMeta, delFlag);
+        writeContentsToFile(abstractEntityFile, this.vmAbstract, params, true);
+    }
+
+    /**
+     *
+     * @param dbType
+     * @param modelMeta
+     * @param delFlag
+     * @return
+     */
+    private Map<String, Object> createParams(String dbType, ModelMeta modelMeta, DelFlag delFlag) {
+    	modelMeta.setDbType(dbType);
+    	return this.createParams(modelMeta, delFlag);
+    }
+
+    /**
+     *
+     * @param modelMeta
+     * @param delFlag
+     * @return
+     */
+    private Map<String, Object> createParams(ModelMeta modelMeta, DelFlag delFlag) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("meta", modelMeta);
+        params.put("delFlag", delFlag);
+        params.put("packageAbstract", packageAbstract);
+        params.put("packageConcrete", packageConcrete);
+        return params;
     }
 
     private Table metaProcess(DatabaseMetaData metaData, String schema, String tableName) throws Exception {
