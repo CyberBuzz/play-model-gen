@@ -1,6 +1,8 @@
 package ${packageAbstract};
 
+import javax.persistence.Id;
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
 import javax.persistence.MappedSuperclass;
 
 import play.db.ebean.Model;
@@ -17,6 +19,10 @@ public abstract class ${meta.abstractEntityName} extends Model {
 
     // serialVesrionUID
     private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue
+    public Long id;
 #foreach(${column} in ${meta.table.columnList})
 
     ${column.columnAnnotation}

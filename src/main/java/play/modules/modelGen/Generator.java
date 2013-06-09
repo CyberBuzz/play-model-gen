@@ -74,14 +74,15 @@ public class Generator {
 
     private final String vmConcrete;
 
-    private final String enumDirPath;
+    private final String vmSlaveConcrete;
+
 
     private DelFlag delFlag;
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateCodeExecutor.class);
 
     public Generator(String genDir, String packageAbstract, String packageConcrete, String host, String schema,
-            String user, String password, String vmAbstract, String vmConcrete, String enumDirPath) {
+            String user, String password, String vmAbstract, String vmConcrete, String vmSlaveConcrete) {
         this.genDir = genDir;
         this.packageAbstract = packageAbstract;
         this.packageConcrete = packageConcrete;
@@ -91,7 +92,7 @@ public class Generator {
         this.password = password;
         this.vmAbstract = vmAbstract;
         this.vmConcrete = vmConcrete;
-        this.enumDirPath = enumDirPath;
+        this.vmSlaveConcrete = vmSlaveConcrete;
         init();
     }
 
@@ -118,25 +119,6 @@ public class Generator {
             logger.info(String.format("delFlag#delValue=%s", delFlag.isDelValue()));
         }
         logger.info("-------------------------");
-
-        File enumDir = new File(enumDirPath);
-        Map<String, CodeValue[]> enumMap = new LinkedHashMap<String, CodeValue[]>();
-        if (enumDir.exists()) {
-            File[] enumJsonFiles = enumDir.listFiles();
-            for (File file : enumJsonFiles) {
-                String key = file.getName().replace(".json", "");
-                String[] tokens = key.split("_");
-                if (tokens.length != 2) {
-                    logger.info("Invalid enum json file name: %s", file.getName());
-                    continue;
-                }
-                String enumJson = org.seasar.util.io.FileUtil.readText(file, "UTF-8");
-                CodeValue[] values = JSON.decode(enumJson, CodeValue[].class);
-                enumMap.put(key, values);
-            }
-        } else {
-            logger.info("Enum json directory not found.");
-        }
 
         logger.info(String.format("%s", schema));
         Map<String, ModelMeta> metaMap = new LinkedHashMap<String, ModelMeta>();
@@ -165,19 +147,10 @@ public class Generator {
             Table table = modelMeta.getTable();
             for (Column column : table.getColumnList()) {
                 String referencedTable = column.getReferenceTableName();
-                String enumKey = modelMeta.getEntityName() + "_" + column.getFieldName();
                 if (StringUtil.isNotBlank(referencedTable) && metaMap.containsKey(referencedTable)) {
                     logger.info(String.format("relation %s.%s > %s", table.getName(), column.getColumnName(),
                             referencedTable));
                     column.setReferencedModel(metaMap.get(referencedTable.trim()));
-                }
-
-                // 再代入なのであまりよい実装ではないが妥協 yamada
-                CodeValue[] codeValues = enumMap.get(enumKey);
-                if (codeValues != null && codeValues.length > 0) {
-                    CodeDef codeDef = new CodeDef(org.seasar.util.lang.StringUtil.capitalize(column.getFieldName()), column.getJavaType());
-                    codeDef.addCodeValues(Arrays.asList(codeValues));
-                    ((ColumnForPlay) column).setCodeDef(codeDef);
                 }
             }
         }
@@ -205,16 +178,29 @@ public class Generator {
      * @param pathConcrete
      */
     private void generateEntity(ModelMeta modelMeta, DelFlag delFlag, String pathConcrete) {
-        String[] dbTypes = new String[]{"Master", "Slave"};
-        for(String dbType : dbTypes) {
-        	String entityName = String.format("%s%s",
-        			org.apache.commons.lang.StringUtils.capitalize(dbType), modelMeta.getEntityName());
-        	String path = String.format("%s/%s", pathConcrete, org.apache.commons.lang.StringUtils.lowerCase(dbType));
-            String entityFilePath = String.format("%s/%s.java", path, entityName);
-            File entityFile = new File(entityFilePath);
-            Map<String, Object> params = this.createParams(dbType, modelMeta, delFlag);
-            writeContentsToFile(entityFile, this.vmConcrete, params, false);
-        }
+    	String entityName = modelMeta.getEntityName();
+        String entityFilePath = String.format("%s/%s.java", pathConcrete, entityName);
+        File entityFile = new File(entityFilePath);
+        Map<String, Object> params = this.createParams(modelMeta, delFlag);
+        writeContentsToFile(entityFile, this.vmConcrete, params, false);
+        this.genetateSlaveEntity(modelMeta, delFlag, pathConcrete);
+    }
+
+    /**
+     * SlaveEntityクラス生成処理
+     * @param modelMeta ModelMeta
+     * @param delFlag DelFlag
+     * @param pathConcrete
+     */
+    private void genetateSlaveEntity(ModelMeta modelMeta, DelFlag delFlag, String pathConcrete) {
+    	String dbType = "Slave";
+    	String entityName = String.format("%s%s",
+    			org.apache.commons.lang.StringUtils.capitalize(dbType), modelMeta.getEntityName());
+    	String path = String.format("%s/%s", pathConcrete, org.apache.commons.lang.StringUtils.lowerCase(dbType));
+        String entityFilePath = String.format("%s/%s.java", path, entityName);
+        File entityFile = new File(entityFilePath);
+        Map<String, Object> params = this.createParams(dbType, modelMeta, delFlag);
+        writeContentsToFile(entityFile, this.vmSlaveConcrete, params, false);
         modelMeta.setDbType(StringUtils.EMPTY);
     }
 
