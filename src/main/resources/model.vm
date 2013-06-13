@@ -52,6 +52,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     @Override
     public void save() {
         Date now = PlayDateTime.now().toDate();
+        this.deleteFlg = false;
         this.createDate = now;
         this.updateDate = now;
         super.save();
