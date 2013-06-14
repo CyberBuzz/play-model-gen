@@ -27,6 +27,7 @@ public abstract class ${meta.abstractEntityName} extends Model {
 
     ${column.columnAnnotation}
     public ${column.javaType} ${column.fieldName}${column.defaultValue};
+#end
 
 #foreach(${column} in ${meta.table.columnList})
 #if(${column.referencedModel})
