@@ -27,61 +27,6 @@ public abstract class ${meta.abstractEntityName} extends Model {
 
     ${column.columnAnnotation}
     public ${column.javaType} ${column.fieldName}${column.defaultValue};
-#if(${column.codeDef})
-
-    @javax.persistence.Transient
-    public ${column.codeDef.enumName} get${column.codeDef.enumName}E() {
-        return ${column.codeDef.enumName}.fromValue(${column.fieldName});
-    }
-
-    public enum ${column.codeDef.enumName} implements jp.co.cyberbuzz.play.db.CodeValue<${column.codeDef.keyType}> {
-#foreach(${codeValue} in ${column.codeDef.codeValues})
-#if(${column.codeDef.keyType} == "String")
-        ${codeValue.field}("${codeValue.value}", "${codeValue.label}"),
-#elseif(${column.codeDef.keyType} == "Long")
-        ${codeValue.field}(${codeValue.value}L, "${codeValue.label}"),
-#elseif(${column.codeDef.keyType} == "Float")
-        ${codeValue.field}(${codeValue.value}f, "${codeValue.label}"),
-#else
-        ${codeValue.field}(${codeValue.value}, "${codeValue.label}"),
-#end
-#end
-        ;
-        private final ${column.codeDef.keyType} value;
-
-        private final String label;
-
-        private ${column.codeDef.enumName}(${column.codeDef.keyType} value, String label) {
-            this.value = value;
-            this.label = label;
-        }
-
-        @Override
-        public ${column.codeDef.keyType} getValue() {
-            return value;
-        }
-
-        @Override
-        public String getLabel() {
-            return label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-
-        public static ${column.codeDef.enumName} fromValue(${column.codeDef.keyType} value) {
-            for (${column.codeDef.enumName} e : values()) {
-                if (e.getValue().equals(value)) {
-                    return e;
-                }
-            }
-            return null;
-        }
-    }
-#end
-#end
 
 #foreach(${column} in ${meta.table.columnList})
 #if(${column.referencedModel})

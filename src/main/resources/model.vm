@@ -32,9 +32,9 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @return 結果
      */
     public static ${meta.entityName} findAliveById(long id) {
-    	${meta.entityName} result = find.where()
-    	                  .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
-        return result == null ? new ${meta.entityName}(): result;
+      ${meta.entityName} result = find.where()
+                        .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
+        return result;
     }
 
     /**

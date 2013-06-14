@@ -30,9 +30,9 @@ public class ${meta.dbType}${meta.entityName} extends ${meta.abstractEntityName}
      * @return 結果
      */
     public static ${meta.dbType}${meta.entityName} findAliveById(long id) {
-    	${meta.dbType}${meta.entityName} result = find.where()
-    	                  .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
-        return result == null ? new ${meta.dbType}${meta.entityName}(): result;
+      ${meta.dbType}${meta.entityName} result = find.where()
+                        .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
+        return result;
     }
 
     /**
