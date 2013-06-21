@@ -58,7 +58,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
         this.deleteFlg = false;
         this.createDate = now;
         this.updateDate = now;
-        super.save();
+        super.save(RESOURCE_NAME);
     }
 
     /**
@@ -68,7 +68,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     public void update() {
         Date now = PlayDateTime.now().toDate();
         this.updateDate = now;
-        super.update();
+        super.update(RESOURCE_NAME);
     }
 
     /**
@@ -79,7 +79,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     public void update(Object obj) {
         Date now = PlayDateTime.now().toDate();
         this.updateDate = now;
-        super.update(obj);
+        super.update(obj, RESOURCE_NAME);
     }
 
     // @OneToMany area
