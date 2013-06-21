@@ -23,8 +23,11 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     // serialVesrionUID
     private static final long serialVersionUID = 1L;
 
+    // ResourceName
+    private static final String RESOURCE_NAME = "master";
+
     // ModelFinder
-    public static Model.Finder<Long, ${meta.entityName}> find = new Model.Finder<Long, ${meta.entityName}>(Long.class, ${meta.entityName}.class);
+    public static Model.Finder<Long, ${meta.entityName}> find = new Model.Finder<Long, ${meta.entityName}>(RESOURCE_NAME, Long.class, ${meta.entityName}.class);
 
     /**
      * 指定したIDに一致し、論理削除されていないレコードを返します。
