@@ -10,6 +10,7 @@ import ${packageAbstract}.${meta.abstractEntityName};
 import constant.Flg;
 import play.db.ebean.Model;
 import jp.co.cyberbuzz.play.PlayDateTime;
+import constant.DbResouceType;
 
 /**
  *
@@ -23,11 +24,20 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     // serialVesrionUID
     private static final long serialVersionUID = 1L;
 
-    // ResourceName
-    private static final String RESOURCE_NAME = "master";
+    // ModelFinder(Master)
+    public static Model.Finder<Long, ${meta.entityName}> find = new Model.Finder<Long, ${meta.entityName}>(DbResouceType.MASTER.getValue(), Long.class, ${meta.entityName}.class);
 
-    // ModelFinder
-    public static Model.Finder<Long, ${meta.entityName}> find = new Model.Finder<Long, ${meta.entityName}>(RESOURCE_NAME, Long.class, ${meta.entityName}.class);
+    // ModelFinder(Slave)
+    public static Model.Finder<Long, ${meta.entityName}> slaveFind = new Model.Finder<Long, ${meta.entityName}>(DbResouceType.SLAVE.getValue(), Long.class, ${meta.entityName}.class);
+
+    /**
+     * Finder選択処理
+     * @param dbResouceType DBリソース種別
+     * @return Finder
+     */
+    private static Finder<Long, ${meta.entityName}> selectFinder(DbResouceType dbResouceType) {
+        return dbResouceType == DbResouceType.SLAVE ? slaveFind : find;
+    }
 
     /**
      * 指定したIDに一致し、論理削除されていないレコードを返します。
@@ -35,17 +45,38 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @return 結果
      */
     public static ${meta.entityName} findAliveById(long id) {
-      ${meta.entityName} result = find.where()
-                        .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
-        return result;
+        return findAliveById(id, DbResouceType.MASTER);
     }
+
+    /**
+     * 指定したIDに一致し、論理削除されていないレコードを返します。
+     * @param id ID
+     * @param dbResouceType DBリソース種別
+     * @return 結果
+     */
+    public static ${meta.entityName} findAliveById(long id, DbResouceType dbResouceType) {
+        Finder<Long, ${meta.entityName}> finder = selectFinder(dbResouceType);
+        ${meta.entityName} result = finder.where()
+                          .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
+        return result;
+      }
 
     /**
      * 論理削除されていないレコードを全件取得します。
      * @return 結果
      */
     public static List<${meta.entityName}> findAliveAll() {
-        return find.where()
+        return findAliveAll(DbResouceType.MASTER);
+    }
+
+    /**
+     * 論理削除されていないレコードを全件取得します。
+     * @param dbResouceType DBリソース種別
+     * @return 結果
+     */
+    public static List<${meta.entityName}> findAliveAll(DbResouceType dbResouceType) {
+        Finder<Long, ${meta.entityName}> finder = selectFinder(dbResouceType);
+        return finder.where()
                    .eq("deleteFlg", Flg.OFF.getValue()).findList();
     }
 
@@ -58,7 +89,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
         this.deleteFlg = false;
         this.createDate = now;
         this.updateDate = now;
-        super.save(RESOURCE_NAME);
+        super.save(DbResouceType.MASTER.getValue());
     }
 
     /**
@@ -68,7 +99,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     public void update() {
         Date now = PlayDateTime.now().toDate();
         this.updateDate = now;
-        super.update(RESOURCE_NAME);
+        super.update(DbResouceType.MASTER.getValue());
     }
 
     /**
@@ -79,7 +110,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
     public void update(Object obj) {
         Date now = PlayDateTime.now().toDate();
         this.updateDate = now;
-        super.update(obj, RESOURCE_NAME);
+        super.update(obj, DbResouceType.MASTER.getValue());
     }
 
     // @OneToMany area

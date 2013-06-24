@@ -7,7 +7,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,9 +18,8 @@ import java.util.Set;
 
 import me.stormcat.maven.plugin.s2jdbcgen.DelFlag;
 import me.stormcat.maven.plugin.s2jdbcgen.GenerateCodeExecutor;
+import me.stormcat.maven.plugin.s2jdbcgen.ModelMeta;
 import me.stormcat.maven.plugin.s2jdbcgen.factory.ColumnListBuilder;
-import me.stormcat.maven.plugin.s2jdbcgen.meta.CodeDef;
-import me.stormcat.maven.plugin.s2jdbcgen.meta.CodeValue;
 import me.stormcat.maven.plugin.s2jdbcgen.meta.Column;
 import me.stormcat.maven.plugin.s2jdbcgen.meta.Index;
 import me.stormcat.maven.plugin.s2jdbcgen.meta.Table;
@@ -29,9 +27,7 @@ import me.stormcat.maven.plugin.s2jdbcgen.util.ConnectionUtil;
 import me.stormcat.maven.plugin.s2jdbcgen.util.DriverManagerUtil;
 import me.stormcat.maven.plugin.s2jdbcgen.util.FileUtil;
 import me.stormcat.maven.plugin.s2jdbcgen.util.StringUtil;
-import net.arnx.jsonic.JSON;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -74,15 +70,12 @@ public class Generator {
 
     private final String vmConcrete;
 
-    private final String vmSlaveConcrete;
-
-
     private DelFlag delFlag;
 
     private static final Logger logger = LoggerFactory.getLogger(GenerateCodeExecutor.class);
 
     public Generator(String genDir, String packageAbstract, String packageConcrete, String host, String schema,
-            String user, String password, String vmAbstract, String vmConcrete, String vmSlaveConcrete) {
+            String user, String password, String vmAbstract, String vmConcrete) {
         this.genDir = genDir;
         this.packageAbstract = packageAbstract;
         this.packageConcrete = packageConcrete;
@@ -92,7 +85,6 @@ public class Generator {
         this.password = password;
         this.vmAbstract = vmAbstract;
         this.vmConcrete = vmConcrete;
-        this.vmSlaveConcrete = vmSlaveConcrete;
         init();
     }
 
@@ -178,30 +170,11 @@ public class Generator {
      * @param pathConcrete
      */
     private void generateEntity(ModelMeta modelMeta, DelFlag delFlag, String pathConcrete) {
-    	String entityName = modelMeta.getEntityName();
+        String entityName = modelMeta.getEntityName();
         String entityFilePath = String.format("%s/%s.java", pathConcrete, entityName);
         File entityFile = new File(entityFilePath);
         Map<String, Object> params = this.createParams(modelMeta, delFlag);
         writeContentsToFile(entityFile, this.vmConcrete, params, false);
-        this.genetateSlaveEntity(modelMeta, delFlag, pathConcrete);
-    }
-
-    /**
-     * SlaveEntityクラス生成処理
-     * @param modelMeta ModelMeta
-     * @param delFlag DelFlag
-     * @param pathConcrete
-     */
-    private void genetateSlaveEntity(ModelMeta modelMeta, DelFlag delFlag, String pathConcrete) {
-    	String dbType = "Slave";
-    	String entityName = String.format("%s%s",
-    			org.apache.commons.lang.StringUtils.capitalize(dbType), modelMeta.getEntityName());
-    	String path = String.format("%s/%s", pathConcrete, org.apache.commons.lang.StringUtils.lowerCase(dbType));
-        String entityFilePath = String.format("%s/%s.java", path, entityName);
-        File entityFile = new File(entityFilePath);
-        Map<String, Object> params = this.createParams(dbType, modelMeta, delFlag);
-        writeContentsToFile(entityFile, this.vmSlaveConcrete, params, false);
-        modelMeta.setDbType(StringUtils.EMPTY);
     }
 
     /**
@@ -215,18 +188,6 @@ public class Generator {
         File abstractEntityFile = new File(filePath);
         Map<String, Object> params = this.createParams(modelMeta, delFlag);
         writeContentsToFile(abstractEntityFile, this.vmAbstract, params, true);
-    }
-
-    /**
-     *
-     * @param dbType
-     * @param modelMeta
-     * @param delFlag
-     * @return
-     */
-    private Map<String, Object> createParams(String dbType, ModelMeta modelMeta, DelFlag delFlag) {
-    	modelMeta.setDbType(dbType);
-    	return this.createParams(modelMeta, delFlag);
     }
 
     /**
@@ -334,7 +295,7 @@ public class Generator {
      */
     public static void main(String[] args) {
         Generator executor = new Generator(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7],
-                args[8], args[9]);
+                args[8]);
         DelFlag delFlag = new DelFlag();
         delFlag.setName("valid");
         delFlag.setDelValue(false);
