@@ -44,8 +44,8 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @param id ID
      * @return 結果
      */
-    public static ${meta.entityName} findAliveById(long id) {
-        return findAliveById(id, DbResouceType.MASTER);
+    public static ${meta.entityName} findById(long id) {
+        return findById(id, DbResouceType.MASTER);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @param dbResouceType DBリソース種別
      * @return 結果
      */
-    public static ${meta.entityName} findAliveById(long id, DbResouceType dbResouceType) {
+    public static ${meta.entityName} findById(long id, DbResouceType dbResouceType) {
         Finder<Long, ${meta.entityName}> finder = selectFinder(dbResouceType);
         ${meta.entityName} result = finder.where()
                           .eq("id", id).eq("deleteFlg", Flg.OFF.getValue()).findUnique();
@@ -65,8 +65,8 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * 論理削除されていないレコードを全件取得します。
      * @return 結果
      */
-    public static List<${meta.entityName}> findAliveAll() {
-        return findAliveAll(DbResouceType.MASTER);
+    public static List<${meta.entityName}> findAll() {
+        return findAll(DbResouceType.MASTER);
     }
 
     /**
@@ -74,7 +74,7 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @param dbResouceType DBリソース種別
      * @return 結果
      */
-    public static List<${meta.entityName}> findAliveAll(DbResouceType dbResouceType) {
+    public static List<${meta.entityName}> findAll(DbResouceType dbResouceType) {
         Finder<Long, ${meta.entityName}> finder = selectFinder(dbResouceType);
         return finder.where()
                    .eq("deleteFlg", Flg.OFF.getValue()).findList();
