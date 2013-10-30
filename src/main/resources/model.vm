@@ -20,16 +20,8 @@ public class ${meta.entityName} extends ${meta.abstractEntityName} {
      * @return 結果
      */
     public static ${meta.entityName} findAliveById(long id) {
-        java.util.List<${meta.entityName}> result = find("id = ? AND del = 0", id).fetch();
+        java.util.List<${meta.entityName}> result = find("id = ?", id).fetch();
         return result.isEmpty() ? null : result.get(0);
-    }
-    
-    /**
-     * 論理削除されていないレコードを全件取得します。
-     * @return 結果
-     */
-    public static java.util.List<${meta.entityName}> findAliveAll() {
-        return find("del = 0").fetch();
     }
 
     // @OneToMany area
