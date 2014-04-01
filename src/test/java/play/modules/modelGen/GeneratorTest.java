@@ -1,5 +1,6 @@
 package play.modules.modelGen;
 
+import org.junit.Test;
 
 public class GeneratorTest {
 
@@ -68,4 +69,8 @@ public class GeneratorTest {
     // }
     // return "";
     // }
+
+    @Test
+    public void testExecute() {
+    }
 }
