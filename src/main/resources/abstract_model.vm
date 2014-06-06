@@ -3,7 +3,7 @@ package ${packageAbstract};
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import jp.co.cyberbuzz.play.db.Model;
+import jp.co.cyberbuzz.play10.db.Model;
 
 import ${packageConcrete}.*;
 

@@ -9,3 +9,19 @@
 /lib
 /velocity.log
 /target
+
+# Eclipse
+.settings/
+local.properties
+.metadata
+.classpath
+.project
+
+# IDEA
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# Other
+*.log
