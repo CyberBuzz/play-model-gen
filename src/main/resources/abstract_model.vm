@@ -25,7 +25,7 @@ public abstract class ${meta.abstractEntityName} extends Model {
         return ${column.codeDef.enumName}.fromValue(${column.fieldName});
     }
 
-    public enum ${column.codeDef.enumName} implements jp.co.cyberbuzz.play.db.CodeValue<${column.codeDef.keyType}> {
+    public enum ${column.codeDef.enumName} implements jp.co.cyberbuzz.play10.db.CodeValue<${column.codeDef.keyType}> {
 #foreach(${codeValue} in ${column.codeDef.codeValues})
 #if(${column.codeDef.keyType} == "String")
         ${codeValue.field}("${codeValue.value}", "${codeValue.label}"),
